@@ -1,5 +1,8 @@
 package com.api.bankAccountApi;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
@@ -10,6 +13,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.api.bankAccountApi.entities.Account;
+import com.api.bankAccountApi.entities.Operation;
+import com.api.bankAccountApi.entities.OperationType;
 import com.api.bankAccountApi.exceptions.AccountNotFoundException;
 import com.api.bankAccountApi.exceptions.BusinessException;
 import com.api.bankAccountApi.exceptions.InvalidRessourceValuesException;
@@ -35,8 +40,12 @@ public class AccountServiceTest {
 	@Test
 	public void itShouldDebitAccount() throws BusinessException {
 		AccountService accountService = new AccountServiceImpl(accountRepository);
-		Optional<Account> account = Optional.of(new Account("FRXXXXXXX", 200));
-		Mockito.when(accountRepository.findById("FRXXXXXXX")).thenReturn(account);
+		List<Operation> operations = new ArrayList<>();
+		operations.add(new Operation(100, new Date(), OperationType.CREDIT));
+		Account account = new Account("FRXXXXXXX", 200);
+		account.setOperations(operations);
+		Optional<Account> optionalAccount = Optional.of(account);
+		Mockito.when(accountRepository.findById("FRXXXXXXX")).thenReturn(optionalAccount);
 		accountService.debit("FRXXXXXXX", 200);
 	}
 
@@ -72,8 +81,12 @@ public class AccountServiceTest {
 	@Test
 	public void itShouldCreditAccount() throws BusinessException {
 		AccountService accountService = new AccountServiceImpl(accountRepository);
-		Optional<Account> account = Optional.of(new Account("FRXXXXXXX", 400));
-		Mockito.when(accountRepository.findById("FRXXXXXXX")).thenReturn(account);
+		List<Operation> operations = new ArrayList<>();
+		operations.add(new Operation(100, new Date(), OperationType.CREDIT));
+		Account account = new Account("FRXXXXXXX", 400);
+		account.setOperations(operations);
+		Optional<Account> optionalAccount = Optional.of(account);
+		Mockito.when(accountRepository.findById("FRXXXXXXX")).thenReturn(optionalAccount);
 		accountService.credit("FRXXXXXXX", 200);
 	}
 
@@ -128,13 +141,23 @@ public class AccountServiceTest {
 	@Test
 	public void itShouldtransferAccount() throws BusinessException {
 		AccountService accountService = new AccountServiceImpl(accountRepository);
-		Optional<Account> payerAccount = Optional.of(new Account("FRXXXXXXX", 400));
-		Optional<Account> payeeAccount = Optional.of(new Account("FRYYYYYYY", 200));
 
-		Mockito.when(accountRepository.findById("FRXXXXXXX")).thenReturn(payerAccount);
-		Mockito.when(accountRepository.findById("FRYYYYYYY")).thenReturn(payeeAccount);
+		List<Operation> payerOperations = new ArrayList<>();
+		payerOperations.add(new Operation(100, new Date(), OperationType.DEBIT));
+		Account payerAccount = new Account("FRXXXXXXX", 400);
+		payerAccount.setOperations(payerOperations);
+		Optional<Account> optionalPayerAccount = Optional.of(payerAccount);
 
-		accountService.transfer(payerAccount.get().getIban(), payeeAccount.get().getIban(), 200);
+		List<Operation> payeeOperations = new ArrayList<>();
+		payeeOperations.add(new Operation(100, new Date(), OperationType.CREDIT));
+		Account payeeAccount = new Account("FRYYYYYYY", 200);
+		payeeAccount.setOperations(payeeOperations);
+		Optional<Account> optionalPayeeAccount = Optional.of(payeeAccount);
+
+		Mockito.when(accountRepository.findById("FRXXXXXXX")).thenReturn(optionalPayerAccount);
+		Mockito.when(accountRepository.findById("FRYYYYYYY")).thenReturn(optionalPayeeAccount);
+
+		accountService.transfer(optionalPayerAccount.get().getIban(), optionalPayeeAccount.get().getIban(), 200);
 	}
 
 }
