@@ -160,4 +160,28 @@ public class AccountServiceTest {
 		accountService.transfer(optionalPayerAccount.get().getIban(), optionalPayeeAccount.get().getIban(), 200);
 	}
 
+	@Test
+	public void itShouldNotGetAccountWithNullIban() throws BusinessException {
+		AccountService accountService = new AccountServiceImpl(accountRepository);
+
+		Account account = new Account(null, 400);
+		Optional<Account> optionalAccount = Optional.of(account);
+
+		Assertions.assertThrows(InvalidRessourceValuesException.class, () -> {
+			accountService.getAccountByIban(optionalAccount.get().getIban());
+		});
+	}
+
+	@Test
+	public void itShouldNotGetAccountWithInvalidIban() throws BusinessException {
+		AccountService accountService = new AccountServiceImpl(accountRepository);
+
+		Account account = new Account("FRYYYYYYY", 400);
+		Optional<Account> optionalAccount = Optional.of(account);
+
+		Assertions.assertThrows(AccountNotFoundException.class, () -> {
+			accountService.getAccountByIban(optionalAccount.get().getIban());
+		});
+	}
+
 }

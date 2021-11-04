@@ -1,11 +1,16 @@
 package com.api.bankAccountApi.services;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
+
+import com.api.bankAccountApi.dtos.AccountDTO;
+import com.api.bankAccountApi.dtos.OperationDTO;
 import com.api.bankAccountApi.entities.Account;
 import com.api.bankAccountApi.entities.Operation;
 import com.api.bankAccountApi.entities.OperationType;
@@ -72,5 +77,33 @@ public class AccountServiceImpl implements AccountService {
 			return account.get();
 		else
 			return null;
+	}
+	
+	@Override
+	public AccountDTO getAccountByIban(String iban) throws BusinessException {
+		// TODO Auto-generated method stub
+		if(iban != null) {
+			Optional<Account> account = accountRepository.findById(iban);
+			if(account.isPresent()) {
+				return toAccountDTO(account.get());
+			}else {
+				throw new AccountNotFoundException();
+			}
+			
+		}else {
+			throw new InvalidRessourceValuesException("verify your Iban");
+		}
+		
+	}
+
+	private AccountDTO toAccountDTO(Account account) {
+		
+		AccountDTO accountDTO = new AccountDTO();
+		accountDTO.setIban(account.getIban());
+		accountDTO.setAmount(account.getAmount());
+		List<OperationDTO> operationDTO= new ArrayList<>();
+		account.getOperations().forEach(operation -> operationDTO.add(new OperationDTO(operation.getId(),operation.getAmount(),operation.getDate().toString(),operation.getOperationType().toString())));
+		accountDTO.setOperationDTOs(operationDTO);
+		return accountDTO;
 	}
 }
