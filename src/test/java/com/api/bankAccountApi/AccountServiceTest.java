@@ -42,7 +42,36 @@ public class AccountServiceTest{
 		AccountService accountService = new AccountServiceImpl(accountRepository);
 		Optional<Account> account = Optional.ofNullable(null);
 		Mockito.when(accountRepository.findById("FRXXXXXXX")).thenReturn(account);
-		Assertions.assertThrows(AccountNotFoundException.class, ()->{accountService.debit("FRXXXXXXX", 200);} );
-
+		Assertions.assertThrows(InvalidRessourceValuesException.class, ()->{accountService.debit("FRXXXXXXX", 200);} );
 	}
+	
+	@Test
+	public void itShouldNotDebitWithInferiorAmount() throws BusinessException {
+		AccountService accountService = new AccountServiceImpl(accountRepository);
+		Optional<Account> account = Optional.of(new Account("FRXXXXXXX",200));
+		Mockito.when(accountRepository.findById("FRXXXXXXX")).thenReturn(account);
+		Assertions.assertThrows(InvalidRessourceValuesException.class, ()->{accountService.debit("FRXXXXXXX", 400);} );
+	}
+	@Test
+	public void itShouldThrowInvalidRessourceValuesExceptionsWhenCreditAccountServiceCalled() throws InvalidRessourceValuesException {
+		AccountService accountService = new AccountServiceImpl(null);
+		Assertions.assertThrows(InvalidRessourceValuesException.class, ()->{accountService.credit(null, 0);} );
+	}
+	
+	@Test
+	public void itShouldCreditAccount() throws BusinessException {
+		AccountService accountService = new AccountServiceImpl(accountRepository);
+		Optional<Account> account = Optional.of(new Account("FRXXXXXXX",400));
+		Mockito.when(accountRepository.findById("FRXXXXXXX")).thenReturn(account);
+		accountService.credit("FRXXXXXXX", 200);
+	}
+	
+	@Test
+	public void itShouldNotCreditInexsistantAccount() throws BusinessException {
+		AccountService accountService = new AccountServiceImpl(accountRepository);
+		Optional<Account> account = Optional.ofNullable(null);
+		Mockito.when(accountRepository.findById("FRXXXXXXX")).thenReturn(account);
+		Assertions.assertThrows(AccountNotFoundException.class, ()->{accountService.credit("FRXXXXXXX", 200);} );
+	}
+
 }

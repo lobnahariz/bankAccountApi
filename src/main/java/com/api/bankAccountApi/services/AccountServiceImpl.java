@@ -27,7 +27,7 @@ public class AccountServiceImpl implements AccountService {
 			account.setAmount(accountAmount - amount);
 			accountRepository.save(account);
 		} else {
-			throw new AccountNotFoundException();
+			throw new InvalidRessourceValuesException("Account doesn't exist or negative amount");
 		}
 	}
 
