@@ -6,15 +6,25 @@ import java.util.Objects;
 public class OperationDTO implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private String iban;
+	private long id;
 	private double amount;
+	private String date;
+	private String operationType;
 
-	public String getIban() {
-		return iban;
+	public OperationDTO(long id, double amount, String date, String operationType) {
+		super();
+		this.id = id;
+		this.amount = amount;
+		this.date = date;
+		this.operationType = operationType;
 	}
 
-	public void setIban(String iban) {
-		this.iban = iban;
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
 	}
 
 	public double getAmount() {
@@ -25,9 +35,25 @@ public class OperationDTO implements Serializable {
 		this.amount = amount;
 	}
 
+	public String getDate() {
+		return date;
+	}
+
+	public void setDate(String date) {
+		this.date = date;
+	}
+
+	public String getOperationType() {
+		return operationType;
+	}
+
+	public void setOperationType(String operationType) {
+		this.operationType = operationType;
+	}
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(amount, iban);
+		return Objects.hash(amount, date, id, operationType);
 	}
 
 	@Override
@@ -40,12 +66,15 @@ public class OperationDTO implements Serializable {
 			return false;
 		OperationDTO other = (OperationDTO) obj;
 		return Double.doubleToLongBits(amount) == Double.doubleToLongBits(other.amount)
-				&& Objects.equals(iban, other.iban);
+				&& Objects.equals(date, other.date) && id == other.id
+				&& Objects.equals(operationType, other.operationType);
 	}
 
 	@Override
 	public String toString() {
-		return "OperationDTO [iban=" + iban + ", amount=" + amount + "]";
+		return "OperationDTO [id=" + id + ", amount=" + amount + ", date=" + date + ", operationType=" + operationType
+				+ "]";
 	}
-
+	
+	
 }

@@ -1,11 +1,14 @@
 package com.api.bankAccountApi.services;
 
+import java.util.Date;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
 import com.api.bankAccountApi.entities.Account;
+import com.api.bankAccountApi.entities.Operation;
+import com.api.bankAccountApi.entities.OperationType;
 import com.api.bankAccountApi.exceptions.AccountNotFoundException;
 import com.api.bankAccountApi.exceptions.BusinessException;
 import com.api.bankAccountApi.exceptions.InvalidRessourceValuesException;
@@ -28,6 +31,7 @@ public class AccountServiceImpl implements AccountService {
 		if (account != null && account.getAmount() >= amount) {
 			final double accountAmount = account.getAmount();
 			account.setAmount(accountAmount - amount);
+			account.getOperations().add(new Operation(amount,new Date(),OperationType.DEBIT,account));
 			accountRepository.save(account);
 		} else {
 			throw new InvalidRessourceValuesException("Account doesn't exist or negative amount");
@@ -42,6 +46,7 @@ public class AccountServiceImpl implements AccountService {
 		if (account != null) {
 			final double accountAmount = account.getAmount();
 			account.setAmount(accountAmount + amount);
+			account.getOperations().add(new Operation(amount,new Date(),OperationType.CREDIT,account));
 			accountRepository.save(account);
 		} else {
 			throw new AccountNotFoundException();

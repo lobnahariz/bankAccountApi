@@ -1,10 +1,13 @@
 package com.api.bankAccountApi.entities;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 @Entity
 public class Account implements Serializable {
@@ -15,6 +18,9 @@ public class Account implements Serializable {
 	private String iban;
 
 	private double amount;
+
+	@OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+	private List<Operation> operations;
 
 	public Account() {
 		super();
@@ -43,9 +49,17 @@ public class Account implements Serializable {
 		this.amount = amount;
 	}
 
+	public List<Operation> getOperations() {
+		return operations;
+	}
+
+	public void setOperations(List<Operation> operations) {
+		this.operations = operations;
+	}
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(amount, iban);
+		return Objects.hash(amount, iban, operations);
 	}
 
 	@Override
@@ -58,12 +72,12 @@ public class Account implements Serializable {
 			return false;
 		Account other = (Account) obj;
 		return Double.doubleToLongBits(amount) == Double.doubleToLongBits(other.amount)
-				&& Objects.equals(iban, other.iban);
+				&& Objects.equals(iban, other.iban) && Objects.equals(operations, other.operations);
 	}
 
 	@Override
 	public String toString() {
-		return "Account [iban=" + iban + ", amount=" + amount + "]";
+		return "Account [iban=" + iban + ", amount=" + amount + ", operations=" + operations + "]";
 	}
 
 }
