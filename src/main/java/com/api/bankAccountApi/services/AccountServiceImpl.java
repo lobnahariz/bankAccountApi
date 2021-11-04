@@ -2,6 +2,8 @@ package com.api.bankAccountApi.services;
 
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.stereotype.Service;
 import com.api.bankAccountApi.entities.Account;
 import com.api.bankAccountApi.exceptions.AccountNotFoundException;
@@ -19,6 +21,7 @@ public class AccountServiceImpl implements AccountService {
 	}
 
 	@Override
+	@Transactional
 	public void debit(String iban, double amount) throws BusinessException {
 		// TODO Auto-generated method stub
 		Account account = verifyAccount(iban, amount);
@@ -32,6 +35,7 @@ public class AccountServiceImpl implements AccountService {
 	}
 
 	@Override
+	@Transactional
 	public void credit(String iban, double amount) throws BusinessException {
 		// TODO Auto-generated method stub
 		Account account = verifyAccount(iban, amount);
@@ -41,6 +45,17 @@ public class AccountServiceImpl implements AccountService {
 			accountRepository.save(account);
 		} else {
 			throw new AccountNotFoundException();
+		}
+	}
+
+	@Override
+	@Transactional
+	public void transfer(String payerIban, String payeeIban, double amount) throws BusinessException {
+		if (payerIban != null && payeeIban != null && amount > 0 && !payeeIban.equals(payerIban)) {
+			debit(payerIban, amount);
+			credit(payeeIban, amount);
+		} else {
+			throw new InvalidRessourceValuesException("Verify your payerIban/payeeIban/amount");
 		}
 	}
 

@@ -8,4 +8,5 @@ public interface AccountService {
 
 	public void credit(String iban, double amount) throws BusinessException;
 
+	public void transfer(String payerIban, String payeeIban, double amount) throws BusinessException;
 }
