@@ -115,11 +115,26 @@ public class AccountServiceTest {
 	}
 
 	@Test
+	public void itShouldNotTransferAccountWithInferiorAmount() throws BusinessException {
+		AccountService accountService = new AccountServiceImpl(accountRepository);
+		Optional<Account> payerAccount = Optional.of(new Account("FRXXXXXXX", 400));
+		Optional<Account> payeeAccount = Optional.of(new Account("FRYYYYYYY", 200));
+
+		Assertions.assertThrows(InvalidRessourceValuesException.class, () -> {
+			accountService.transfer(payerAccount.get().getIban(), payeeAccount.get().getIban(), 600);
+		});
+	}
+
+	@Test
 	public void itShouldtransferAccount() throws BusinessException {
 		AccountService accountService = new AccountServiceImpl(accountRepository);
-		Optional<Account> account = Optional.of(new Account("FRXXXXXXX", 200));
-		Mockito.when(accountRepository.findById("FRXXXXXXX")).thenReturn(account);
-		accountService.debit("FRXXXXXXX", 200);
+		Optional<Account> payerAccount = Optional.of(new Account("FRXXXXXXX", 400));
+		Optional<Account> payeeAccount = Optional.of(new Account("FRYYYYYYY", 200));
+
+		Mockito.when(accountRepository.findById("FRXXXXXXX")).thenReturn(payerAccount);
+		Mockito.when(accountRepository.findById("FRYYYYYYY")).thenReturn(payeeAccount);
+
+		accountService.transfer(payerAccount.get().getIban(), payeeAccount.get().getIban(), 200);
 	}
 
 }
