@@ -26,7 +26,6 @@ public class Operation implements Serializable {
 
 	public Operation() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public Operation(double amount, Date date, OperationType operationType) {
@@ -83,31 +82,6 @@ public class Operation implements Serializable {
 
 	public void setAccount(Account account) {
 		this.account = account;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(account, amount, date, id, operationType);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Operation other = (Operation) obj;
-		return Objects.equals(account, other.account)
-				&& Double.doubleToLongBits(amount) == Double.doubleToLongBits(other.amount)
-				&& Objects.equals(date, other.date) && id == other.id && operationType == other.operationType;
-	}
-
-	@Override
-	public String toString() {
-		return "Operation [id=" + id + ", amount=" + amount + ", date=" + date + ", operationType=" + operationType
-				+ ", account=" + account + "]";
 	}
 
 }

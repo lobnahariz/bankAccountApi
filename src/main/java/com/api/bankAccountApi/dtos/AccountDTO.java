@@ -2,7 +2,6 @@ package com.api.bankAccountApi.dtos;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Objects;
 
 public class AccountDTO implements Serializable {
 
@@ -13,7 +12,6 @@ public class AccountDTO implements Serializable {
 
 	public AccountDTO() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public AccountDTO(String iban, double amount, List<OperationDTO> operationDTOs) {
@@ -46,28 +44,4 @@ public class AccountDTO implements Serializable {
 	public void setOperationDTOs(List<OperationDTO> operationDTOs) {
 		this.operationDTOs = operationDTOs;
 	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(amount, iban, operationDTOs);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		AccountDTO other = (AccountDTO) obj;
-		return Double.doubleToLongBits(amount) == Double.doubleToLongBits(other.amount)
-				&& Objects.equals(iban, other.iban) && Objects.equals(operationDTOs, other.operationDTOs);
-	}
-
-	@Override
-	public String toString() {
-		return "AccountDTO [iban=" + iban + ", amount=" + amount + ", operationDTOs=" + operationDTOs + "]";
-	}
-
 }

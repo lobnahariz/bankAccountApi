@@ -29,44 +29,43 @@ public class AccountServiceImpl implements AccountService {
 	}
 
 	@Override
-	@Transactional
-	public void debit(String iban, double amount) throws BusinessException {
-		// TODO Auto-generated method stub
+	public Account create(String iban, double amount) throws BusinessException {
 		Account account = verifyAccount(iban, amount);
-		if (account != null && account.getAmount() >= amount) {
-			final double accountAmount = account.getAmount();
-			account.setAmount(accountAmount - amount);
-			account.getOperations().add(new Operation(amount,new Date(),OperationType.DEBIT,account));
-			accountRepository.save(account);
-		} else {
+		if(account != null)
+			throw new InvalidRessourceValuesException("Iban is already exist");
+		return accountRepository.save(new Account(iban,amount));
+	}
+	
+	@Override
+	public void debit(String iban, double amount) throws BusinessException {
+		Account account = verifyAccount(iban, amount);
+		if (account == null || account.getAmount() < amount)
 			throw new InvalidRessourceValuesException("Account doesn't exist or negative amount");
-		}
+		final double accountAmount = account.getAmount();
+		account.setAmount(accountAmount - amount);
+		account.getOperations().add(new Operation(amount, new Date(), OperationType.DEBIT, account));
+		accountRepository.save(account);
 	}
 
 	@Override
-	@Transactional
 	public void credit(String iban, double amount) throws BusinessException {
-		// TODO Auto-generated method stub
 		Account account = verifyAccount(iban, amount);
-		if (account != null) {
-			final double accountAmount = account.getAmount();
-			account.setAmount(accountAmount + amount);
-			account.getOperations().add(new Operation(amount,new Date(),OperationType.CREDIT,account));
-			accountRepository.save(account);
-		} else {
+		if (account == null)
 			throw new AccountNotFoundException();
-		}
+		account.setAmount(account.getAmount() + amount);
+		account.getOperations().add(new Operation(amount, new Date(), OperationType.CREDIT, account));
+		accountRepository.save(account);
 	}
 
 	@Override
 	@Transactional
 	public void transfer(String payerIban, String payeeIban, double amount) throws BusinessException {
-		if (payerIban != null && payeeIban != null && amount > 0 && !payeeIban.equals(payerIban)) {
-			debit(payerIban, amount);
-			credit(payeeIban, amount);
-		} else {
+		verifyAccount(payerIban, amount);
+		verifyAccount(payeeIban, amount);
+		if (payeeIban.equals(payerIban))
 			throw new InvalidRessourceValuesException("Verify your payerIban/payeeIban/amount");
-		}
+		debit(payerIban, amount);
+		credit(payeeIban, amount);
 	}
 
 	private Account verifyAccount(String iban, double amount) throws InvalidRessourceValuesException {
@@ -78,31 +77,26 @@ public class AccountServiceImpl implements AccountService {
 		else
 			return null;
 	}
-	
+
 	@Override
 	public AccountDTO getAccountByIban(String iban) throws BusinessException {
-		// TODO Auto-generated method stub
-		if(iban != null) {
-			Optional<Account> account = accountRepository.findById(iban);
-			if(account.isPresent()) {
-				return toAccountDTO(account.get());
-			}else {
-				throw new AccountNotFoundException();
-			}
-			
-		}else {
+		if (iban == null)
 			throw new InvalidRessourceValuesException("verify your Iban");
-		}
-		
+
+		Optional<Account> account = accountRepository.findById(iban);
+		if (!account.isPresent())
+			throw new AccountNotFoundException();
+		return toAccountDTO(account.get());
 	}
 
 	private AccountDTO toAccountDTO(Account account) {
-		
+
 		AccountDTO accountDTO = new AccountDTO();
 		accountDTO.setIban(account.getIban());
 		accountDTO.setAmount(account.getAmount());
-		List<OperationDTO> operationDTO= new ArrayList<>();
-		account.getOperations().forEach(operation -> operationDTO.add(new OperationDTO(operation.getId(),operation.getAmount(),operation.getDate().toString(),operation.getOperationType().toString())));
+		List<OperationDTO> operationDTO = new ArrayList<>();
+		account.getOperations().forEach(operation -> operationDTO.add(new OperationDTO(operation.getId(),
+				operation.getAmount(), operation.getDate().toString(), operation.getOperationType().toString())));
 		accountDTO.setOperationDTOs(operationDTO);
 		return accountDTO;
 	}

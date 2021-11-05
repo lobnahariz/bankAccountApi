@@ -24,11 +24,9 @@ public class Account implements Serializable {
 
 	public Account() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public Account(String iban, double amount) {
-		// TODO Auto-generated constructor stub
 		this.iban = iban;
 		this.amount = amount;
 	}
@@ -56,28 +54,4 @@ public class Account implements Serializable {
 	public void setOperations(List<Operation> operations) {
 		this.operations = operations;
 	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(amount, iban, operations);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Account other = (Account) obj;
-		return Double.doubleToLongBits(amount) == Double.doubleToLongBits(other.amount)
-				&& Objects.equals(iban, other.iban) && Objects.equals(operations, other.operations);
-	}
-
-	@Override
-	public String toString() {
-		return "Account [iban=" + iban + ", amount=" + amount + ", operations=" + operations + "]";
-	}
-
 }

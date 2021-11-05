@@ -8,7 +8,6 @@ public class AccountNotFoundException extends BusinessException implements Seria
 
 	public AccountNotFoundException() {
 		super("Account Not Found");
-		// TODO Auto-generated constructor stub
 	}
 
 }
