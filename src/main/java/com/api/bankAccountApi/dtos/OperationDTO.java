@@ -51,30 +51,4 @@ public class OperationDTO implements Serializable {
 		this.operationType = operationType;
 	}
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(amount, date, id, operationType);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		OperationDTO other = (OperationDTO) obj;
-		return Double.doubleToLongBits(amount) == Double.doubleToLongBits(other.amount)
-				&& Objects.equals(date, other.date) && id == other.id
-				&& Objects.equals(operationType, other.operationType);
-	}
-
-	@Override
-	public String toString() {
-		return "OperationDTO [id=" + id + ", amount=" + amount + ", date=" + date + ", operationType=" + operationType
-				+ "]";
-	}
-	
-	
 }

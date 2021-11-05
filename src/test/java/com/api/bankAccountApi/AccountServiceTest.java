@@ -29,8 +29,7 @@ public class AccountServiceTest {
 	AccountRepository accountRepository;
 
 	@Test
-	public void itShouldThrowInvalidRessourceValuesExceptionsWhenDebitAccountServiceCalled()
-			throws InvalidRessourceValuesException {
+	public void itShouldNotDebitAccountWhenIbanIsNull() throws InvalidRessourceValuesException {
 		AccountService accountService = new AccountServiceImpl(null);
 		Assertions.assertThrows(InvalidRessourceValuesException.class, () -> {
 			accountService.debit(null, 0);
@@ -38,7 +37,7 @@ public class AccountServiceTest {
 	}
 
 	@Test
-	public void itShouldDebitAccount() throws BusinessException {
+	public void itShouldDebitAccountWhenValidAccountAndAmount() throws BusinessException {
 		AccountService accountService = new AccountServiceImpl(accountRepository);
 		List<Operation> operations = new ArrayList<>();
 		operations.add(new Operation(100, new Date(), OperationType.CREDIT));
@@ -50,7 +49,7 @@ public class AccountServiceTest {
 	}
 
 	@Test
-	public void itShouldNotDebitInexsistantAccount() throws BusinessException {
+	public void itShouldNotDebitWhenInexsistantAccount() throws BusinessException {
 		AccountService accountService = new AccountServiceImpl(accountRepository);
 		Optional<Account> account = Optional.ofNullable(null);
 		Mockito.when(accountRepository.findById("FRXXXXXXX")).thenReturn(account);
@@ -60,7 +59,7 @@ public class AccountServiceTest {
 	}
 
 	@Test
-	public void itShouldNotDebitWithInferiorAmount() throws BusinessException {
+	public void itShouldNotDebitWhenTheAccountAmountLessThenTheRequestedAmount() throws BusinessException {
 		AccountService accountService = new AccountServiceImpl(accountRepository);
 		Optional<Account> account = Optional.of(new Account("FRXXXXXXX", 200));
 		Mockito.when(accountRepository.findById("FRXXXXXXX")).thenReturn(account);
@@ -70,8 +69,7 @@ public class AccountServiceTest {
 	}
 
 	@Test
-	public void itShouldThrowInvalidRessourceValuesExceptionsWhenCreditAccountServiceCalled()
-			throws InvalidRessourceValuesException {
+	public void itShouldNotCreditAccountWhenIbanIsNull() throws InvalidRessourceValuesException {
 		AccountService accountService = new AccountServiceImpl(null);
 		Assertions.assertThrows(InvalidRessourceValuesException.class, () -> {
 			accountService.credit(null, 0);
@@ -79,7 +77,7 @@ public class AccountServiceTest {
 	}
 
 	@Test
-	public void itShouldCreditAccount() throws BusinessException {
+	public void itShouldCreditAccountWhenValidAccountAndAmount() throws BusinessException {
 		AccountService accountService = new AccountServiceImpl(accountRepository);
 		List<Operation> operations = new ArrayList<>();
 		operations.add(new Operation(100, new Date(), OperationType.CREDIT));
@@ -110,17 +108,20 @@ public class AccountServiceTest {
 	}
 
 	@Test
-	public void itShouldThrowInvalidRessourceValuesExceptionsWhenTransferAccountServiceCalledWithSameIban()
-			throws InvalidRessourceValuesException {
-		AccountService accountService = new AccountServiceImpl(null);
+	public void itShouldNotTransferWhenThePayerIbanIsSimilarToPayeeIban() throws InvalidRessourceValuesException {
+		Optional<Account> payerAccount = Optional.of(new Account("FRXXXXX", 400));
+		Optional<Account> payeeAccount = Optional.of(new Account("FRXXXXX", 200));
+		AccountService accountService = new AccountServiceImpl(accountRepository);
+		Mockito.when(accountRepository.findById("FRXXXXX")).thenReturn(payerAccount);
+		Mockito.when(accountRepository.findById("FRXXXXX")).thenReturn(payeeAccount);
+
 		Assertions.assertThrows(InvalidRessourceValuesException.class, () -> {
 			accountService.transfer("FRXXXXX", "FRXXXXX", 100);
 		});
 	}
 
 	@Test
-	public void itShouldThrowInvalidRessourceValuesExceptionsWhenTransferAccountServiceCalledWithNegativeAmount()
-			throws InvalidRessourceValuesException {
+	public void itShouldNotTransferWhenNegativeRequestAmount() throws InvalidRessourceValuesException {
 		AccountService accountService = new AccountServiceImpl(null);
 		Assertions.assertThrows(InvalidRessourceValuesException.class, () -> {
 			accountService.transfer("FRXXXXX", "FRYYYYY", -100);
@@ -128,7 +129,7 @@ public class AccountServiceTest {
 	}
 
 	@Test
-	public void itShouldNotTransferAccountWithInferiorAmount() throws BusinessException {
+	public void itShouldNotTransferAccountWhenAccountAmountLessThanRequestAmount() throws BusinessException {
 		AccountService accountService = new AccountServiceImpl(accountRepository);
 		Optional<Account> payerAccount = Optional.of(new Account("FRXXXXXXX", 400));
 		Optional<Account> payeeAccount = Optional.of(new Account("FRYYYYYYY", 200));
@@ -139,7 +140,7 @@ public class AccountServiceTest {
 	}
 
 	@Test
-	public void itShouldtransferAccount() throws BusinessException {
+	public void itShouldtransferAccountWhenThePayerAndPayeeAndAmountAreValid() throws BusinessException {
 		AccountService accountService = new AccountServiceImpl(accountRepository);
 
 		List<Operation> payerOperations = new ArrayList<>();
@@ -184,4 +185,29 @@ public class AccountServiceTest {
 		});
 	}
 
+	@Test
+	public void itShouldGetAccountWithValidIban() throws BusinessException {
+		AccountService accountService = new AccountServiceImpl(accountRepository);
+
+		List<Operation> operations = new ArrayList<>();
+		operations.add(new Operation(100, new Date(), OperationType.CREDIT));
+		Account account = new Account("FRXXXXXXX", 400);
+		account.setOperations(operations);
+		Optional<Account> optionalAccount = Optional.of(account);
+		Mockito.when(accountRepository.findById("FRXXXXXXX")).thenReturn(optionalAccount);
+
+		Assertions.assertEquals(accountService.getAccountByIban(optionalAccount.get().getIban()).getIban(),
+				"FRXXXXXXX");
+		Assertions.assertEquals(accountService.getAccountByIban(optionalAccount.get().getIban()).getAmount(), 400);
+		Assertions.assertEquals(
+				accountService.getAccountByIban(optionalAccount.get().getIban()).getOperationDTOs().size(), 1);
+	};
+
+	@Test
+	public void itShouldNotCreateAccountWhenAmountIsNegative() throws InvalidRessourceValuesException {
+		AccountService accountService = new AccountServiceImpl(null);
+		Assertions.assertThrows(InvalidRessourceValuesException.class, () -> {
+			accountService.create("FRXXXXXXX", -4);
+		});
+	}
 }
